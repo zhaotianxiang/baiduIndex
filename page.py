@@ -46,8 +46,17 @@ class BaiduIndexPage(BasePage):
         element.clear()
         element.send_keys(key)
 
+    def input_new_search_key(self, key):
+        element = self.driver.find_element(*BaiduIndexPageLocators.SEARCH_KEY_INPUT_NEW)
+        element.clear()
+        element.send_keys(key)
+
     def click_submit_button(self):
         element = self.driver.find_element(*BaiduIndexPageLocators.SEARCH_KEY_INPUT_SUBMIT)
+        element.click()
+
+    def click_new_submit_button(self):
+        element = self.driver.find_element(*BaiduIndexPageLocators.SEARCH_KEY_INPUT_SUBMIT_new)
         element.click()
 
         #点击日期自定义按钮
@@ -86,13 +95,22 @@ class BaiduIndexPage(BasePage):
         element = self.driver.find_elements_by_css_selector("#trend rect")[index]
         location = element.location
         print(location['x'],location['y'])
-        self.actions.move_to_element(element)
+        self.actions.move_to_element_with_offset(element,2,2)
         self.actions.click(element)
+        self.actions.double_click(element)
+        
         self.actions.perform()
 
-    def saveTheResult(self):
+    def saveThePicture(self, fileName):
         element = self.driver.find_element(*BaiduIndexPageLocators.AVG_INDEX_PICTURE)
         location = element.location
         print("图片元素和位置已经确定啦！")
         print(location['x'],location['y'])
-        saveElementAsPicture(element, "../picture/test", self.driver)
+        utils.saveElementAsPicture(element, fileName, self.driver)
+
+    def saveData(self, date, keywords, indexType):
+        avg_baidu_index = utils.ocr(keywords+'_'+indexType+'_'+date+'.png')
+
+
+
+
