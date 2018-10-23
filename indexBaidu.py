@@ -1,8 +1,18 @@
 import unittest
+import logging as log
 import time
 from selenium import webdriver
 import page
 from selenium.webdriver.common.action_chains import ActionChains
+import utils
+
+time_str = time.strftime("%Y-%m-%d", time.localtime())
+log.basicConfig(level=log.DEBUG,
+                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S',
+                    filename=time_str+'_executed.log',
+                    filemode='w')
+
 
 class SearchBaiduIndex(unittest.TestCase):
     def setUp(self):
@@ -12,7 +22,7 @@ class SearchBaiduIndex(unittest.TestCase):
         self.driver = webdriver.Chrome(executable_path="chromedriver.exe", chrome_options=self.options)
         self.action = ActionChains(self.driver)
 
-    def test_login_baidu(self):
+    def test_baidu_index(self):
 
         # login
         login_page = page.BaiduLoginPage(self.driver, self.action)
@@ -22,28 +32,40 @@ class SearchBaiduIndex(unittest.TestCase):
         login_page.input_user_password("aini1314@xq")
         time.sleep(10)
         login_page.click_submmit_button()
+        cookies = self.driver.get_cookies()
         print("congradulaions, success login!")
 
-        # search
+        # search index for beginner
         baidu_index_page = page.BaiduIndexPage(self.driver, self.action)
         baidu_index_page.openPage("https://index.baidu.com/")
-        baidu_index_page.input_search_key("赵丽颖")
+        baidu_index_page.input_search_key("start")
         baidu_index_page.click_submit_button()
 
-        baidu_index_page.maxWindows()
-        baidu_index_page.click_self_define_date()
-        baidu_index_page.click_month()
-        baidu_index_page.click_select_define_month()
-        baidu_index_page.click_date_submit()
-        baidu_index_page.click_index_average()
-        time.sleep(6)
-        baidu_index_page.hoverOnAvgIndex(3)
-        # try to display result of picture
-        baidu_index_page.hoverOnAvgIndex(4)
-        #save the result
-        baidu_index_page.saveTheResult()
-        time.sleep(10)
-        # save result
+
+        for keywords in utils.setAllKeywords():
+            for date in utils.setAllDate():
+                # try:
+                    baidu_index_page.input_new_search_key(keywords)
+                    baidu_index_page.click_new_submit_button()
+                    baidu_index_page.maxWindows()
+                    baidu_index_page.click_self_define_date()
+                    baidu_index_page.click_month()
+                    baidu_index_page.click_select_define_month()
+                    baidu_index_page.click_date_submit()
+                    baidu_index_page.click_index_average()
+
+                    for indexType in ["Total","PC","Mobile"]:
+                        baidu_index_page.hoverOnAvgIndex(3)
+                        #baidu_index_page.saveThePicture(keywords+'+'+indexType+'+'+date)
+                        time.sleep(2)
+                        avg_index = utils.ocr(keywords+'_'+indexType+'_'+date+'.png')
+                        items = ",".join([keywords, date, indexType])
+                        print(items)
+                # except Exception as e:
+                #     log.error(keywords+date+"get baidu index failed")
+                #     print(e)
+
+        time.sleep(50)
 
     def tearDown(self):
         self.driver.close()
