@@ -39,5 +39,8 @@ class BaiduIndexPageLocators(object):
     AVG_RECT = (By.CSS_SELECTOR, "#trend rect")
     AVG_INDEX_PICTURE = (By.CLASS_NAME, "contentWord")
 
+    SEARCH_KEY_INPUT_NEW = (By.CSS_SELECTOR, "#schword")
+    SEARCH_KEY_INPUT_SUBMIT_new = (By.CSS_SELECTOR, "#schsubmit")
+
 
 
