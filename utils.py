@@ -1,30 +1,53 @@
-def saveElementAsPicture(imgelement, path, browser):
-    # 找到图片坐标
-    locations = imgelement.location
-    # 跨浏览器兼容
-    scroll = browser.execute_script("return window.scrollY;")
-    top = locations['y'] - scroll
-    # 找到图片大小
-    sizes = imgelement.size
-    # 构造关键词长度
-    add_length = (len(keyword) - 2) * sizes['width'] / 15
-    # 构造指数的位置
-    rangle = (
-    int(locations['x'] + sizes['width'] / 4 + add_length), int(top + sizes['height'] / 2),
-    int(locations['x'] + sizes['width'] * 2 / 3), int(top + sizes['height']))
+import io
+
+from lxml import etree
+from PIL import Image
+import time
+import pytesseract
+import Constant
+import cv2
+
+def ocr(filename):
+    number = -1
+    try:
+        image = Image.open(Constant.const.IDENTIIFIED_PICTURE_FOLDER + filename)
+        print(image)
+        number = pytesseract.image_to_string(image)
+        print(number)
+    except Exception as e:
+        print(e)
+    return number
+
+def saveElementAsPicture(imgelement, filename, browser):
+    scrollY = browser.execute_script("return window.scrollY;")
+    x0 = imgelement.location['x'] + 2
+    y0 = imgelement.location['y'] - scrollY + 2
+    x1 = imgelement.location['x'] + imgelement.size['width'] - 2
+    y1 = imgelement.size['height'] - 2
+
+    print(x0, y0, x1, y1, scrollY)
     time.sleep(2)
-    # 截取当前浏览器
-    browser.save_screenshot(str(path) + ".png")
-    # 打开截图切割
-    img = Image.open(str(path) + ".png")
-    jpg = img.crop(rangle)
-    jpg.save(str(path) + ".jpg")
-    # 将图片放大一倍
-    # 原图大小73.29
-    jpgzoom = Image.open(str(path) + ".jpg")
-    (x, y) = jpgzoom.size
-    x_s = 146
-    y_s = 58
-    out = jpgzoom.resize((x_s, y_s), Image.ANTIALIAS)
-    out.save(path+'big', 'jpg', quality=95)
-    print("成功保存了图片")
+
+    browser.save_screenshot(Constant.const.INTER_RESULT_FOLDER+filename+".png")
+    picture = Image.open(Constant.const.INTER_RESULT_FOLDER+filename+".png")
+    croped = picture.crop((x0, y0, x1, y1))
+    croped.save(Constant.const.IDENTIIFIED_PICTURE_FOLDER+filename+".png")
+    print("save the picture")
+
+#二值化算法 这个没啥必要了 因为已经二值化了
+def binarizing(img,threshold):
+    pixdata = img.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            if pixdata[x, y] < threshold:
+                pixdata[x, y] = 0
+            else:
+                pixdata[x, y] = 255
+    return img
+
+def setAllKeywords():
+    return ["赵丽颖+zhaoliying"]
+
+def setAllDate():
+    return ["2018-9"]
