@@ -1,3 +1,4 @@
+import Constant
 import unittest
 import logging as log
 import time
@@ -5,14 +6,8 @@ from selenium import webdriver
 import page
 from selenium.webdriver.common.action_chains import ActionChains
 import utils
-
-time_str = time.strftime("%Y-%m-%d", time.localtime())
-log.basicConfig(level=log.DEBUG,
-                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename=time_str+'_executed.log',
-                    filemode='w')
-
+import pandas as pd
+import numpy as np
 
 class SearchBaiduIndex(unittest.TestCase):
     def setUp(self):
@@ -41,32 +36,48 @@ class SearchBaiduIndex(unittest.TestCase):
         baidu_index_page.input_search_key("start")
         baidu_index_page.click_submit_button()
 
+        '''
+        理想化的函数：
+        @param1: 地区:全国，北京，香港
+        @param2: 查询日期:2018-09
+        @param3: 查询关键字: 赵丽颖+zhaoliyig
 
+        @output: void 处理过程中将结果转换成csv
+        '''
+        df = pd.DataFrame(columns=['key_words','date_range','index_type','baidu_index'])
+        i = 0
         for keywords in utils.setAllKeywords():
             for date in utils.setAllDate():
-                # try:
+                try:
                     baidu_index_page.input_new_search_key(keywords)
                     baidu_index_page.click_new_submit_button()
                     baidu_index_page.maxWindows()
                     baidu_index_page.click_self_define_date()
+                    time.sleep(10)
                     baidu_index_page.click_month()
+                    time.sleep(10)
                     baidu_index_page.click_select_define_month()
                     baidu_index_page.click_date_submit()
                     baidu_index_page.click_index_average()
 
                     for indexType in ["Total","PC","Mobile"]:
+                        filename = keywords+'.'+indexType+'.'+date
+                        if "PC" == indexType:
+                            baidu_index_page.click_pc_index_button()
+                        if "Mobile" == indexType:
+                            baidu_index_page.click_mobile_index_button()
                         baidu_index_page.hoverOnAvgIndex(3)
-                        #baidu_index_page.saveThePicture(keywords+'+'+indexType+'+'+date)
-                        time.sleep(2)
-                        avg_index = utils.ocr(keywords+'_'+indexType+'_'+date+'.png')
-                        items = ",".join([keywords, date, indexType])
-                        print(items)
-                # except Exception as e:
-                #     log.error(keywords+date+"get baidu index failed")
-                #     print(e)
-
-        time.sleep(50)
-
+                        baidu_index_page.hoverOnAvgIndex(4)
+                        baidu_index_page.saveThePicture(filename)
+                        time.sleep(1)
+                        avg_index = utils.ocr(Constant.IDENTIIFIED_PICTURE_FOLDER+filename+".png").replace(",","")
+                        df.loc[i] = [keywords, date, indexType, avg_index]
+                        i+=1
+                except Exception as e:
+                    print(keywords+date+"get failed")
+                    print(e)
+                    time.sleep(60*60)
+        df.to_csv(Constant.FINAL_RESULT_DIR+Constant.FINAL_RESULT_FILE_NAME,index=False,sep=',')
     def tearDown(self):
         self.driver.close()
 
