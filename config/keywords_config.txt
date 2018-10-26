@@ -1,0 +1,28 @@
+﻿WeChat,微信
+QQ,手机QQ
+Weibo,新浪微博
+Taobao,淘宝
+Tmall,天猫
+JD.com,京东
+VIPshop,唯品会
+Meituan,美团
+Meilishuo,美丽说
+Mogujie,蘑菇街
+Jumei,聚美优品
+58.com,58同城
+Ganji,赶集网
+Autohome,汽车之家
+Bitauto,易车网
+Soufun,搜房网
+Youku,优酷
+iQiyi,爱奇艺
+QQ TV,腾讯视频
+Sohu TV,搜狐视频
+Qunar,去哪儿网
+Ctrip,携程
+YY,YY直播
+Suning,苏宁易购
+Gome,国美在线
+Uber,优步
+DiDi,滴滴出行
+Ucar,神州专车
